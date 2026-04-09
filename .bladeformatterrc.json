@@ -1,0 +1,7 @@
+{
+    "ignorePatterns": [
+        "resources/views/emails/idea/**",
+        "resources/views/vendor/mail/html/**",
+        "resources/views/vendor/mail/text/**"
+    ]
+}

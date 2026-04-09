@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\IdeaApproved;
+use App\Events\IdeaNeedsRevision;
+use App\Events\IdeaRejected;
+use App\Listeners\SendIdeaApprovedNotification;
+use App\Listeners\SendIdeaNeedsRevisionNotification;
+use App\Listeners\SendIdeaRejectedNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -18,6 +24,16 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        IdeaApproved::class => [
+            SendIdeaApprovedNotification::class,
+        ],
+        IdeaRejected::class => [
+            SendIdeaRejectedNotification::class,
+        ],
+        IdeaNeedsRevision::class => [
+            SendIdeaNeedsRevisionNotification::class,
+        ],
+
     ];
 
     /**
