@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Project;
+use App\Events\IdeaApproved;
+use App\Events\IdeaNeedsRevision;
+use App\Events\IdeaRejected;
 use App\Models\Content;
 use App\Models\ContentVersion;
 use App\Models\Professor;
+use App\Models\Project;
 use App\Models\ProjectStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +27,7 @@ class ProjectEvaluationController extends Controller
             ->first();
 
         // Validate that it has city_program_id
-        if (!$professor || !$professor->city_program_id) {
+        if (! $professor || ! $professor->city_program_id) {
             abort(403, 'No se pudo determinar el programa del líder de comité.');
         }
 
@@ -32,15 +35,15 @@ class ProjectEvaluationController extends Controller
 
         // Filter projects by city_program of the lead professor
         $projects = Project::whereHas('projectStatus', function ($query) {
-                $query->where('name', 'Pendiente de aprobación');
-            })
+            $query->where('name', 'Pendiente de aprobación');
+        })
             ->where(function ($query) use ($cityProgramId) {
                 $query->whereHas('students', function ($sub) use ($cityProgramId) {
                     $sub->where('city_program_id', $cityProgramId);
                 })
-                ->orWhereHas('professors', function ($sub) use ($cityProgramId) {
-                    $sub->where('city_program_id', $cityProgramId);
-                });
+                    ->orWhereHas('professors', function ($sub) use ($cityProgramId) {
+                        $sub->where('city_program_id', $cityProgramId);
+                    });
             })
             ->with([
                 'projectStatus',
@@ -48,14 +51,14 @@ class ProjectEvaluationController extends Controller
                 'versions.contentVersions.content',
                 'contentFrameworkProjects.contentFramework.framework',
                 'students',
-                'professors'
+                'professors',
             ])
             ->get();
 
         return view('projects.evaluation.index', compact('projects'));
     }
 
-   // app/Http/Controllers/ProjectEvaluationController.php
+    // app/Http/Controllers/ProjectEvaluationController.php
     public function show(Project $project)
     {
         // Cargar relaciones necesarias
@@ -91,7 +94,6 @@ class ProjectEvaluationController extends Controller
         return view('projects.evaluation.show', compact('project', 'latestVersion', 'contentValues', 'frameworksSelected'));
     }
 
-
     public function evaluate(Request $request, Project $project)
     {
         $validated = $request->validate([
@@ -103,7 +105,7 @@ class ProjectEvaluationController extends Controller
 
         // 🔍 Detectar si el proyecto es de profesor o de estudiantes
         $isProfessorProject = $project->professors()->exists();
-        $isStudentProject = !$isProfessorProject; // si no tiene profesores, es de estudiantes
+        $isStudentProject = ! $isProfessorProject; // si no tiene profesores, es de estudiantes
 
         // 🧠 Si el estado asignado es Aprobado y el proyecto es de estudiantes → cambiar a Asignado
         if ($statusName === 'Aprobado' && $isStudentProject) {
@@ -112,7 +114,7 @@ class ProjectEvaluationController extends Controller
 
         // Buscar el estado final en BD
         $status = ProjectStatus::where('name', $statusName)->first();
-        if (!$status) {
+        if (! $status) {
             return back()->with('error', "No se encontró el estado '$statusName'.");
         }
 
@@ -138,9 +140,14 @@ class ProjectEvaluationController extends Controller
             }
         }
 
+        match ($validated['status']) {
+            'Aprobado' => IdeaApproved::dispatch($project),
+            'Rechazado' => IdeaRejected::dispatch($project),
+            'Devuelto para corrección' => IdeaNeedsRevision::dispatch($project),
+        };
+
         return redirect()
             ->route('projects.evaluation.index')
             ->with('success', "Evaluación del proyecto '{$project->title}' enviada correctamente con estado: $statusName.");
     }
-
 }
