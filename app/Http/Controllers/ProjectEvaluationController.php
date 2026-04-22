@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\IdeaApproved;
-use App\Events\IdeaNeedsRevision;
-use App\Events\IdeaRejected;
+use App\Events\IdeaGeneral;
 use App\Models\Content;
 use App\Models\ContentVersion;
 use App\Models\Professor;
@@ -147,9 +145,9 @@ class ProjectEvaluationController extends Controller
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
                 match ($validated['status']) {
-                    'Aprobado' => IdeaApproved::dispatch($project),
-                    'Rechazado' => IdeaRejected::dispatch($project),
-                    'Devuelto para corrección' => IdeaNeedsRevision::dispatch($project),
+                    'Aprobado' => IdeaGeneral::dispatch($project),
+                    'Rechazado' => IdeaGeneral::dispatch($project),
+                    'Devuelto para corrección' => IdeaGeneral::dispatch($project),
                 };
                 // Si el dispatch fue exitoso, salimos del bucle
                 break;

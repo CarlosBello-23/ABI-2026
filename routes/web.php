@@ -1,27 +1,27 @@
 <?php
 
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BankApprovedIdeasAssignController;
+use App\Http\Controllers\BankApprovedIdeasForProfessorsController;
+use App\Http\Controllers\BankApprovedIdeasForStudentsController;
 use App\Http\Controllers\CityController;
-use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\FormularioController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PerfilController;
-use App\Http\Controllers\FrameworkController;
+use App\Http\Controllers\CityProgramController;
 use App\Http\Controllers\ContentFrameworkController;
 use App\Http\Controllers\ContentFrameworkProjectController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\FormularioController;
+use App\Http\Controllers\FrameworkController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvestigationLineController;
+use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectEvaluationController;
 use App\Http\Controllers\ResearchGroupController;
 use App\Http\Controllers\ThematicAreaController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\ProjectEvaluationController;
-use App\Http\Controllers\BankApprovedIdeasForStudentsController;
-use App\Http\Controllers\BankApprovedIdeasForProfessorsController;
-use App\Http\Controllers\CityProgramController;
-use App\Http\Controllers\BankApprovedIdeasAssignController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -52,7 +52,7 @@ Route::middleware(['auth', 'role:research_staff'])->group(function () {
     // Profile (edición solo personal de investigaciones)
     Route::get('/perfil/editar', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
-    
+
     //  Added routes for Departments and Cities (new addition)
     // These were added to manage departments and their related cities
     Route::resource('departments', DepartmentController::class);
@@ -82,7 +82,7 @@ Route::middleware(['auth', 'role:research_staff'])->group(function () {
         return view('versions.edit', ['versionId' => $versionId]);
     })->name('versions.edit');
     Route::get('versions/{versionId}', function (int $versionId) {
-     return view('versions.show', ['versionId' => $versionId]);
+        return view('versions.show', ['versionId' => $versionId]);
     })->name('versions.show');
 
     Route::view('content-versions', 'content-versions.index')->name('content-versions.index');
