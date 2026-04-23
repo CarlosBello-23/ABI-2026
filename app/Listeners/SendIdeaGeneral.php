@@ -2,15 +2,12 @@
 
 namespace App\Listeners;
 
-use App\Events\IdeaRejected;
-use App\Mail\IdeaRejectedMail;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Events\IdeaGeneral;
+use App\Mail\GeneralMail;
 use Illuminate\Support\Facades\Mail;
 
-class SendIdeaRejectedNotification implements ShouldQueue
+class SendIdeaGeneral
 {
-    public string $queue = 'emails';
-
     /**
      * Create the event listener.
      */
@@ -22,7 +19,7 @@ class SendIdeaRejectedNotification implements ShouldQueue
     /**
      * Handle the event.
      */
-    public function handle(IdeaRejected $event): void
+    public function handle(IdeaGeneral $event): void
     {
         $project = $event->project->load([
             'projectStatus',
@@ -54,7 +51,7 @@ class SendIdeaRejectedNotification implements ShouldQueue
 
         $recipients->unique('email')->each(function ($recipient) use ($project) {
             Mail::to($recipient['email'])
-                ->send(new IdeaRejectedMail($project, $recipient));
+                ->send(new GeneralMail($project, $recipient));
         });
     }
 }

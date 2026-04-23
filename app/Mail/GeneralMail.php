@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class IdeaRejectedMail extends Mailable
+class GeneralMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -32,7 +32,7 @@ class IdeaRejectedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '¡Tú idea de proyecto ha sido rechazada!',
+            subject: '¡Idea General!',
         );
     }
 
@@ -42,7 +42,7 @@ class IdeaRejectedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.idea.rejected',
+            markdown: 'emails.idea.general',
             with: [
                 'recipientName' => $this->recipient['name'],
                 'recipientRole' => $this->recipient['role'],
@@ -50,5 +50,15 @@ class IdeaRejectedMail extends Mailable
                 'evaluationCriteria' => $this->project->evaluation_criteria,
             ]
         );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
     }
 }
